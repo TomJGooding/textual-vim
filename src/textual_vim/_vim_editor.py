@@ -66,6 +66,10 @@ class VimEditor(Widget):
         self.query_one(StatusLine).update()
         self.query_one(CommandRegister).focus()
 
+    def load_text(self, text: str) -> None:
+        text_area = self.query_one(VimTextArea)
+        text_area.load_text(text)
+
     @on(CommandRegister.Changed)
     def on_command_register_changed(self, event: CommandRegister.Changed) -> None:
         text_area = self.query_one(VimTextArea)
