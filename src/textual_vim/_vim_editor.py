@@ -98,6 +98,20 @@ class VimEditor(Widget):
             text_area.action_delete_right()
             text_area.action_cursor_left()
             command_complete = True
+        # Basic motions
+        elif event.value[-1] == "w":
+            text_area.action_cursor_word_right()
+            text_area.action_cursor_word_right()
+            text_area.action_cursor_word_left()
+            command_complete = True
+        elif event.value[-1] == "e":
+            text_area.action_cursor_word_right()
+            text_area.action_cursor_left()
+            command_complete = True
+        elif event.value[-1] == "$":
+            text_area.action_cursor_line_end()
+            text_area.action_cursor_left()
+            command_complete = True
 
         if command_complete:
             event.input.value = ""
