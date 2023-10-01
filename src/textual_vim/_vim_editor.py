@@ -5,6 +5,7 @@ from textual.app import ComposeResult
 from textual.message import Message
 from textual.widget import Widget
 from textual.widgets import Input, Static, TextArea
+from typing_extensions import override
 
 
 class CommandRegister(Input):
@@ -43,10 +44,25 @@ class VimTextArea(TextArea):
         def control(self) -> VimTextArea:
             return self.vim_text_area
 
+    class Focused(Message):
+        def __init__(self, vim_text_area: VimTextArea) -> None:
+            super().__init__()
+            self.vim_text_area = vim_text_area
+
+        @property
+        def control(self) -> VimTextArea:
+            return self.vim_text_area
+
+    @override
     def _on_blur(self, _: events.Blur) -> None:
         self._pause_blink(visible=True)
         self.action_cursor_left()
         self.post_message(self.Blurred(self))
+
+    @override
+    def _on_focus(self, _: events.Focus) -> None:
+        self._restart_blink()
+        self.post_message(self.Focused(self))
 
 
 class VimEditor(Widget):
@@ -123,3 +139,7 @@ class VimEditor(Widget):
     @on(VimTextArea.Blurred)
     def on_vim_text_area_blurred(self) -> None:
         self.end_insert_mode()
+
+    @on(VimTextArea.Focused)
+    def on_vim_text_area_focused(self) -> None:
+        self.start_insert_mode()
