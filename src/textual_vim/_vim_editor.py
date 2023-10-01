@@ -2,9 +2,11 @@ from __future__ import annotations
 
 from textual import events, on
 from textual.app import ComposeResult
+from textual.geometry import clamp
 from textual.message import Message
 from textual.widget import Widget
 from textual.widgets import Input, Static, TextArea
+from textual.widgets.text_area import Location
 from typing_extensions import override
 
 
@@ -52,6 +54,39 @@ class VimTextArea(TextArea):
         @property
         def control(self) -> VimTextArea:
             return self.vim_text_area
+
+    @override
+    def get_cursor_left_location(self) -> Location:
+        if self.cursor_at_start_of_text:
+            return 0, 0
+        cursor_row, cursor_column = self.selection.end
+        target_row = cursor_row
+        target_column = cursor_column - 1 if cursor_column != 0 else cursor_column
+        return target_row, target_column
+
+    @override
+    def get_cursor_right_location(self) -> Location:
+        if self.cursor_at_end_of_text:
+            return self.selection.end
+        cursor_row, cursor_column = self.selection.end
+        target_row = cursor_row
+        target_column = (
+            cursor_column + 1 if not self.cursor_at_end_of_line else cursor_column
+        )
+        return target_row, target_column
+
+    @override
+    def get_cursor_up_location(self) -> Location:
+        cursor_row, cursor_column = self.selection.end
+        if self.cursor_at_first_line:
+            return cursor_row, cursor_column
+        target_row = max(0, cursor_row - 1)
+        # Attempt to snap last intentional cell length
+        target_column = self.cell_width_to_column_index(
+            self._last_intentional_cell_width, target_row
+        )
+        target_column = clamp(target_column, 0, len(self.document[target_row]))
+        return target_row, target_column
 
     @override
     def _on_blur(self, _: events.Blur) -> None:
