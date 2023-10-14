@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from textual import events, on
 from textual.app import ComposeResult
+from textual.binding import Binding
 from textual.geometry import clamp
 from textual.message import Message
 from textual.widget import Widget
@@ -36,7 +37,21 @@ class StatusLine(Static):
     """
 
 
-class VimTextArea(TextArea):
+class VimTextArea(TextArea, inherit_bindings=False):
+    BINDINGS = [
+        Binding("escape", "screen.focus_next", "Shift Focus", show=False),
+        Binding("up", "cursor_up", "cursor up", show=False),
+        Binding("down", "cursor_down", "cursor down", show=False),
+        Binding("left", "cursor_left", "cursor left", show=False),
+        Binding("right", "cursor_right", "cursor right", show=False),
+        # Binding("shift+left", "cursor_word_left", "cursor word left", show=False),
+        # Binding("shift+right", "cursor_word_right", "cursor word right", show=False),
+        Binding("home", "cursor_line_start", "cursor line start", show=False),
+        Binding("end", "cursor_line_end", "cursor line end", show=False),
+        Binding("pageup", "cursor_page_up", "cursor page up", show=False),
+        Binding("pagedown", "cursor_page_down", "cursor page down", show=False),
+    ]
+
     class Blurred(Message):
         def __init__(self, vim_text_area: VimTextArea) -> None:
             super().__init__()
