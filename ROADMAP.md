@@ -2,12 +2,20 @@
 
 ## Features
 
-- [ ] Insert Mode
+- [x] Insert Mode
 - [ ] Normal Mode
 - [ ] Number Prefixes
 - [ ] Visual Mode
 - [ ] Undo/Redo
 - [ ] Visual Line Mode
+
+## Insert mode keys
+
+- [x] `<Esc>` - end Insert mode, back to Normal mode
+- [x] `cursor keys` - move left/right/up/down
+- [ ] `shift-left/right` - one word left/right
+- [x] `<End>` - end the line
+- [x] `<Home>` - start of line
 
 ## Left-right motions
 
