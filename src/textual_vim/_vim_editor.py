@@ -38,6 +38,12 @@ class StatusLine(Static):
 
 
 class VimTextArea(TextArea, inherit_bindings=False):
+    DEFAULT_CSS = """
+    VimTextArea {
+        scrollbar-size: 0 0;
+    }
+    """
+
     BINDINGS = [
         Binding("escape", "screen.focus_next", "Shift Focus", show=False),
         Binding("up", "cursor_up", "cursor up", show=False),
