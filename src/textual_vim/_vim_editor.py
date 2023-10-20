@@ -45,6 +45,7 @@ class VimTextArea(TextArea, inherit_bindings=False):
     """
 
     BINDINGS = [
+        Binding("backspace", "delete_left", "delete left", show=False),
         Binding("escape", "screen.focus_next", "Shift Focus", show=False),
         Binding("up", "cursor_up", "cursor up", show=False),
         Binding("down", "cursor_down", "cursor down", show=False),
@@ -77,7 +78,16 @@ class VimTextArea(TextArea, inherit_bindings=False):
             return self.vim_text_area
 
     @override
-    def get_cursor_left_location(self) -> Location:
+    def action_cursor_left(self, select: bool = False) -> None:
+        new_cursor_location = self.get_cursor_left_no_wrap_location()
+        self.move_cursor(new_cursor_location, select=select)
+
+    @override
+    def action_cursor_right(self, select: bool = False) -> None:
+        new_cursor_location = self.get_cursor_right_no_wrap_location()
+        self.move_cursor(new_cursor_location, select=select)
+
+    def get_cursor_left_no_wrap_location(self) -> Location:
         if self.cursor_at_start_of_text:
             return 0, 0
         cursor_row, cursor_column = self.selection.end
@@ -85,8 +95,7 @@ class VimTextArea(TextArea, inherit_bindings=False):
         target_column = cursor_column - 1 if cursor_column != 0 else cursor_column
         return target_row, target_column
 
-    @override
-    def get_cursor_right_location(self) -> Location:
+    def get_cursor_right_no_wrap_location(self) -> Location:
         if self.cursor_at_end_of_text:
             return self.selection.end
         cursor_row, cursor_column = self.selection.end
