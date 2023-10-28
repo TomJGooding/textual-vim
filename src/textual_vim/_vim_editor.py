@@ -228,8 +228,10 @@ class VimEditor(Widget):
 
         # Deleting text
         elif event.value[-1] == "x":
-            text_area.action_delete_right()
-            text_area.action_cursor_left()
+            if not text_area.cursor_at_end_of_line:
+                text_area.action_delete_right()
+                if text_area.cursor_at_end_of_line:
+                    text_area.action_cursor_left()
             command_complete = True
 
         # TODO: Copying and moving text

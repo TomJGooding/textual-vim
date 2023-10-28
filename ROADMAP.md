@@ -58,7 +58,7 @@
 
 ## Deleting text
 
-- [ ] `x` - delete under the cursor
+- [x] `x` - delete under the cursor
 - [ ] `X` - delete before the cursor
 - [ ] `dd` - delete lines
 - [ ] `D` - delete to the end of the line
