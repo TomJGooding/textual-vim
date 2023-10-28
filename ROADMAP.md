@@ -19,11 +19,11 @@
 
 ## Left-right motions
 
-- [ ] `h` - left
-- [ ] `l` - right
+- [x] `h` - left
+- [x] `l` - right
 - [ ] `0` - first char of the line
 - [ ] `^` - first non-blank char of the line
-- [ ] `$` - end of line
+- [x] `$` - end of line
 - [ ] `f{char}` - occurrence of char to the right
 - [ ] `F{char}` - occurrence of char to the left
 - [ ] `t{char}` - before occurrence of char to the right
@@ -33,8 +33,8 @@
 
 ## Up-down motions
 
-- [ ] `k` - up
-- [ ] `j` - down
+- [x] `k` - up
+- [x] `j` - down
 - [ ] `G` - last line
 - [ ] `gg` - first line
 
@@ -49,9 +49,9 @@
 
 ## Inserting text
 
-- [ ] `a` - append text after the cursor
+- [x] `a` - append text after the cursor
 - [ ] `A` - append text at the end of the line
-- [ ] `i` - insert text before the cursor
+- [x] `i` - insert text before the cursor
 - [ ] `I` - insert text before the first non-blank in the line
 - [ ] `o` - open a new line below the current line, append text
 - [ ] `O` - open a new line above the current line, append text
