@@ -157,46 +157,47 @@ class VimEditor(Widget):
         command_complete = False
         if not event.value:
             return
-        # Insert or append text
-        if event.value[-1] == "i":
-            self.start_insert_mode()
-            command_complete = True
-        elif event.value[-1] == "a":
-            text_area.action_cursor_right()
-            self.start_insert_mode()
-            command_complete = True
-        # Moving the cursor
-        elif event.value[-1] == "h":
+
+        # Left-right motions
+        if event.value[-1] == "h":
             text_area.action_cursor_left()
-            command_complete = True
-        elif event.value[-1] == "j":
-            text_area.action_cursor_down()
-            command_complete = True
-        elif event.value[-1] == "k":
-            text_area.action_cursor_up()
             command_complete = True
         elif event.value[-1] == "l":
             text_area.action_cursor_right()
-            command_complete = True
-        # Deletion
-        elif event.value[-1] == "x":
-            text_area.action_delete_right()
-            text_area.action_cursor_left()
-            command_complete = True
-        # Basic motions
-        elif event.value[-1] == "w":
-            text_area.action_cursor_word_right()
-            text_area.action_cursor_word_right()
-            text_area.action_cursor_word_left()
-            command_complete = True
-        elif event.value[-1] == "e":
-            text_area.action_cursor_word_right()
-            text_area.action_cursor_left()
             command_complete = True
         elif event.value[-1] == "$":
             text_area.action_cursor_line_end()
             text_area.action_cursor_left()
             command_complete = True
+
+        # Up-down motions
+        elif event.value[-1] == "k":
+            text_area.action_cursor_up()
+            command_complete = True
+        elif event.value[-1] == "j":
+            text_area.action_cursor_down()
+            command_complete = True
+
+        # TODO: Text object motions
+
+        # Inserting text
+        elif event.value[-1] == "a":
+            text_area.action_cursor_right()
+            self.start_insert_mode()
+            command_complete = True
+        elif event.value[-1] == "i":
+            self.start_insert_mode()
+            command_complete = True
+
+        # Deleting text
+        elif event.value[-1] == "x":
+            text_area.action_delete_right()
+            text_area.action_cursor_left()
+            command_complete = True
+
+        # TODO: Copying and moving text
+
+        # TODO: Changing text
 
         if command_complete:
             event.input.value = ""
