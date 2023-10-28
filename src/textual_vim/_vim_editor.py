@@ -212,6 +212,19 @@ class VimEditor(Widget):
             text_area.action_cursor_line_start()
             self.start_insert_mode()
             command_complete = True
+        elif event.value[-1] == "o":
+            cursor_row, _ = text_area.cursor_location
+            new_line = text_area.document.newline
+            text_area.insert(new_line, (cursor_row + 1, 0))
+            self.start_insert_mode()
+            command_complete = True
+        elif event.value[-1] == "O":
+            cursor_row, _ = text_area.cursor_location
+            new_line = text_area.document.newline
+            text_area.insert(new_line, (cursor_row, 0))
+            text_area.action_cursor_up()
+            self.start_insert_mode()
+            command_complete = True
 
         # Deleting text
         elif event.value[-1] == "x":
