@@ -165,6 +165,9 @@ class VimEditor(Widget):
         elif event.value[-1] == "l":
             text_area.action_cursor_right()
             command_complete = True
+        elif event.value[-1] == "^":
+            text_area.action_cursor_line_start()
+            command_complete = True
         elif event.value[-1] == "$":
             text_area.action_cursor_line_end()
             text_area.action_cursor_left()

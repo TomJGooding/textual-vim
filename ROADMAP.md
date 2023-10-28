@@ -22,7 +22,7 @@
 - [x] `h` - left
 - [x] `l` - right
 - [ ] `0` - first char of the line
-- [ ] `^` - first non-blank char of the line
+- [x] `^` - first non-blank char of the line
 - [x] `$` - end of line
 - [ ] `f{char}` - occurrence of char to the right
 - [ ] `F{char}` - occurrence of char to the left
