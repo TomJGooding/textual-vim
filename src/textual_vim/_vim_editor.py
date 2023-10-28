@@ -233,6 +233,10 @@ class VimEditor(Widget):
                 if text_area.cursor_at_end_of_line:
                     text_area.action_cursor_left()
             command_complete = True
+        elif event.value[-1] == "X":
+            if not text_area.cursor_at_start_of_line:
+                text_area.action_delete_left()
+            command_complete = True
 
         # TODO: Copying and moving text
 
