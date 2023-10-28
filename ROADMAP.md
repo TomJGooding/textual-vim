@@ -35,8 +35,8 @@
 
 - [x] `k` - up
 - [x] `j` - down
-- [ ] `G` - last line
-- [ ] `gg` - first line
+- [x] `G` - last line
+- [x] `gg` - first line
 
 ## Text object motions
 
