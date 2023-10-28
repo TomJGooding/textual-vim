@@ -201,6 +201,10 @@ class VimEditor(Widget):
             text_area.action_cursor_right()
             self.start_insert_mode()
             command_complete = True
+        elif event.value[-1] == "A":
+            text_area.action_cursor_line_end()
+            self.start_insert_mode()
+            command_complete = True
         elif event.value[-1] == "i":
             self.start_insert_mode()
             command_complete = True

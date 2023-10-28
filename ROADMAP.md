@@ -50,7 +50,7 @@
 ## Inserting text
 
 - [x] `a` - append text after the cursor
-- [ ] `A` - append text at the end of the line
+- [x] `A` - append text at the end of the line
 - [x] `i` - insert text before the cursor
 - [ ] `I` - insert text before the first non-blank in the line
 - [ ] `o` - open a new line below the current line, append text
