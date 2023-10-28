@@ -184,6 +184,15 @@ class VimEditor(Widget):
         elif event.value[-1] == "j":
             text_area.action_cursor_down()
             command_complete = True
+        elif event.value[-1] == "G":
+            last_line = text_area.document.line_count - 1
+            _, cursor_column = text_area.cursor_location
+            text_area.move_cursor((last_line, cursor_column))
+            command_complete = True
+        elif event.value[-2:] == "gg":
+            _, cursor_column = text_area.cursor_location
+            text_area.move_cursor((0, cursor_column))
+            command_complete = True
 
         # TODO: Text object motions
 
