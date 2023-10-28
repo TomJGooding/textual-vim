@@ -53,8 +53,8 @@
 - [x] `A` - append text at the end of the line
 - [x] `i` - insert text before the cursor
 - [x] `I` - insert text before the first non-blank in the line
-- [ ] `o` - open a new line below the current line, append text
-- [ ] `O` - open a new line above the current line, append text
+- [x] `o` - open a new line below the current line, append text
+- [x] `O` - open a new line above the current line, append text
 
 ## Deleting text
 
