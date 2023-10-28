@@ -59,7 +59,7 @@
 ## Deleting text
 
 - [x] `x` - delete under the cursor
-- [ ] `X` - delete before the cursor
+- [x] `X` - delete before the cursor
 - [ ] `dd` - delete lines
 - [ ] `D` - delete to the end of the line
 - [ ] `d{motion}` - delete the text that is moved over with motion
