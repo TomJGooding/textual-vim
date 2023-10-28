@@ -208,6 +208,10 @@ class VimEditor(Widget):
         elif event.value[-1] == "i":
             self.start_insert_mode()
             command_complete = True
+        elif event.value[-1] == "I":
+            text_area.action_cursor_line_start()
+            self.start_insert_mode()
+            command_complete = True
 
         # Deleting text
         elif event.value[-1] == "x":
