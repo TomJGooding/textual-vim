@@ -76,4 +76,4 @@
 - [ ] `r{char}`- replace with {char}
 - [ ] `c{motion}` - change the text that is moved over with motion
 - [ ] `cc` - change lines
-- [ ] `C` - change to the end of the line
+- [x] `C` - change to the end of the line

@@ -244,7 +244,11 @@ class VimEditor(Widget):
 
         # TODO: Copying and moving text
 
-        # TODO: Changing text
+        # Changing text
+        elif event.value[-1] == "C":
+            text_area.action_delete_to_end_of_line()
+            self.start_insert_mode()
+            command_complete = True
 
         if command_complete:
             event.input.value = ""
