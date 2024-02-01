@@ -8,7 +8,7 @@ from textual.message import Message
 from textual.widget import Widget
 from textual.widgets import Input, Static, TextArea
 from textual.widgets.text_area import Location
-from typing_extensions import override
+from typing_extensions import Literal, override
 
 
 class CommandRegister(Input):
@@ -41,6 +41,13 @@ class VimTextArea(TextArea, inherit_bindings=False):
     DEFAULT_CSS = """
     VimTextArea {
         scrollbar-size: 0 0;
+        border: none;
+        padding: 0;
+    }
+
+    VimTextArea:focus {
+        border: none;
+        padding: 0;
     }
     """
 
@@ -77,6 +84,38 @@ class VimTextArea(TextArea, inherit_bindings=False):
         def control(self) -> VimTextArea:
             return self.vim_text_area
 
+    def __init__(
+        self,
+        text: str = "",
+        *,
+        language: str | None = None,
+        theme: str | None = "monokai",
+        soft_wrap: bool = False,
+        tab_behaviour: Literal["focus", "indent"] = "indent",
+        show_line_numbers: bool = True,
+        name: str | None = None,
+        id: str | None = None,
+        classes: str | None = None,
+        disabled: bool = False,
+    ) -> None:
+        super().__init__(
+            text,
+            language=language,
+            theme=theme,
+            soft_wrap=soft_wrap,
+            tab_behaviour=tab_behaviour,
+            show_line_numbers=show_line_numbers,
+            name=name,
+            id=id,
+            classes=classes,
+            disabled=disabled,
+        )
+
+    @override
+    def watch_has_focus(self, value: bool) -> None:
+        super().watch_has_focus(value)
+        self._cursor_visible = True
+
     @override
     def action_cursor_left(self, select: bool = False) -> None:
         new_cursor_location = self.get_cursor_left_no_wrap_location()
@@ -110,13 +149,16 @@ class VimTextArea(TextArea, inherit_bindings=False):
         cursor_row, cursor_column = self.selection.end
         if self.cursor_at_first_line:
             return cursor_row, cursor_column
-        target_row = max(0, cursor_row - 1)
-        # Attempt to snap last intentional cell length
-        target_column = self.cell_width_to_column_index(
-            self._last_intentional_cell_width, target_row
-        )
-        target_column = clamp(target_column, 0, len(self.document[target_row]))
-        return target_row, target_column
+
+        # TODO: TextArea no longer has _last_intentional_cell_widgth after v0.48!
+        return super().get_cursor_up_location()
+        # target_row = max(0, cursor_row - 1)
+        # # Attempt to snap last intentional cell length
+        # target_column = self.cell_width_to_column_index(
+        #     self._last_intentional_cell_width, target_row
+        # )
+        # target_column = clamp(target_column, 0, len(self.document[target_row]))
+        # return target_row, target_column
 
     @override
     def _on_blur(self, _: events.Blur) -> None:
