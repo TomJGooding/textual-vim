@@ -3,7 +3,6 @@ from __future__ import annotations
 from textual import events, on
 from textual.app import ComposeResult
 from textual.binding import Binding
-from textual.geometry import clamp
 from textual.message import Message
 from textual.widget import Widget
 from textual.widgets import Input, Static, TextArea
@@ -11,30 +10,49 @@ from textual.widgets.text_area import Location
 from typing_extensions import Literal, override
 
 
-class CommandRegister(Input):
+class ModeDisplay(Static):
+    DEFAULT_CSS = """
+    ModeDisplay {
+        width: 1fr;
+        text-style: bold;
+    }
+    """
+
+
+class CommandRegister(Input, inherit_bindings=False):
     DEFAULT_CSS = """
     CommandRegister {
-        height: 0;
-        width: 0;
-        min-height: 0;
-        min-width: 0;
+        height: 1;
+        width: 10;
         border: none;
-        background: red;
+        padding: 0;
     }
 
     CommandRegister:focus {
         border: none;
     }
+
+    CommandRegister>.input--cursor {
+        color: $boost;
+    }
     """
 
+    def on_mount(self) -> None:
+        self.cursor_blink = False
 
-class StatusLine(Static):
+
+class StatusLine(Widget):
     DEFAULT_CSS = """
     StatusLine {
-        text-style: bold;
+        height: 1;
+        layout: horizontal;
         background: #272822;
     }
     """
+
+    def compose(self) -> ComposeResult:
+        yield ModeDisplay()
+        yield CommandRegister()
 
 
 class VimTextArea(TextArea, inherit_bindings=False):
@@ -175,18 +193,17 @@ class VimTextArea(TextArea, inherit_bindings=False):
 class VimEditor(Widget):
     def compose(self) -> ComposeResult:
         yield VimTextArea()
-        yield CommandRegister()
         yield StatusLine()
 
     def on_mount(self) -> None:
         self.query_one(CommandRegister).focus()
 
     def start_insert_mode(self) -> None:
-        self.query_one(StatusLine).update("-- INSERT --")
+        self.query_one(ModeDisplay).update("-- INSERT --")
         self.query_one(VimTextArea).focus()
 
     def end_insert_mode(self) -> None:
-        self.query_one(StatusLine).update()
+        self.query_one(ModeDisplay).update()
         self.query_one(CommandRegister).focus()
 
     def load_text(self, text: str) -> None:
