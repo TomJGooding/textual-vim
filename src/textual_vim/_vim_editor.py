@@ -1,6 +1,9 @@
 from __future__ import annotations
 
-from textual import events, on
+from dataclasses import dataclass
+
+from textual import actions, events, on
+from textual._callback import invoke
 from textual.app import ComposeResult
 from textual.binding import Binding
 from textual.message import Message
@@ -8,6 +11,44 @@ from textual.widget import Widget
 from textual.widgets import Input, Static, TextArea
 from textual.widgets.text_area import Location
 from typing_extensions import Literal, override
+
+
+@dataclass
+class Command:
+    key: str
+    action: str
+
+
+_COMMANDS = [
+    # Left-right motions
+    Command("h", "left"),
+    Command("l", "right"),
+    Command("0", "line_start(False)"),  # first_nonwhite=False
+    Command("^", "line_start(True)"),  # first_nonwhite=True
+    Command("$", "line_end"),
+    # Up-down motions
+    Command("k", "up"),
+    Command("j", "down"),
+    Command("G", "last_line"),
+    Command("g", "first_line"),
+    # TODO: Text object motions
+    # ...
+    # Inserting text
+    Command("a", "edit('a')"),
+    Command("A", "edit('A')"),
+    Command("i", "edit('i')"),
+    Command("I", "edit('I')"),
+    Command("o", "open_line('o')"),
+    Command("O", "open_line('O')"),
+    # Deleting text
+    Command("x", "delete('x')"),
+    Command("X", "delete('X')"),
+    Command("D", "delete('D')"),
+    # TODO: copying and moving text
+    # ...
+    # Changing text
+    Command("C", "delete('C')"),
+]
 
 
 class ModeDisplay(Static):
@@ -200,117 +241,14 @@ class VimEditor(Widget):
 
     def start_insert_mode(self) -> None:
         self.query_one(ModeDisplay).update("-- INSERT --")
-        self.query_one(VimTextArea).focus()
+        self.query_one(TextArea).focus()
 
     def end_insert_mode(self) -> None:
         self.query_one(ModeDisplay).update()
         self.query_one(CommandRegister).focus()
 
     def load_text(self, text: str) -> None:
-        text_area = self.query_one(VimTextArea)
-        text_area.load_text(text)
-
-    @on(CommandRegister.Changed)
-    def on_command_register_changed(self, event: CommandRegister.Changed) -> None:
-        text_area = self.query_one(VimTextArea)
-        command_complete = False
-        if not event.value:
-            return
-
-        # Left-right motions
-        if event.value[-1] == "h":
-            text_area.action_cursor_left()
-            command_complete = True
-        elif event.value[-1] == "l":
-            text_area.action_cursor_right()
-            command_complete = True
-        elif event.value[-1] == "0":
-            cursor_row, _ = text_area.cursor_location
-            text_area.move_cursor((cursor_row, 0))
-            command_complete = True
-        elif event.value[-1] == "^":
-            text_area.action_cursor_line_start()
-            command_complete = True
-        elif event.value[-1] == "$":
-            text_area.action_cursor_line_end()
-            text_area.action_cursor_left()
-            command_complete = True
-
-        # Up-down motions
-        elif event.value[-1] == "k":
-            text_area.action_cursor_up()
-            command_complete = True
-        elif event.value[-1] == "j":
-            text_area.action_cursor_down()
-            command_complete = True
-        elif event.value[-1] == "G":
-            last_line = text_area.document.line_count - 1
-            _, cursor_column = text_area.cursor_location
-            text_area.move_cursor((last_line, cursor_column))
-            command_complete = True
-        elif event.value[-2:] == "gg":
-            _, cursor_column = text_area.cursor_location
-            text_area.move_cursor((0, cursor_column))
-            command_complete = True
-
-        # TODO: Text object motions
-
-        # Inserting text
-        elif event.value[-1] == "a":
-            text_area.action_cursor_right()
-            self.start_insert_mode()
-            command_complete = True
-        elif event.value[-1] == "A":
-            text_area.action_cursor_line_end()
-            self.start_insert_mode()
-            command_complete = True
-        elif event.value[-1] == "i":
-            self.start_insert_mode()
-            command_complete = True
-        elif event.value[-1] == "I":
-            text_area.action_cursor_line_start()
-            self.start_insert_mode()
-            command_complete = True
-        elif event.value[-1] == "o":
-            cursor_row, _ = text_area.cursor_location
-            new_line = text_area.document.newline
-            text_area.insert(new_line, (cursor_row + 1, 0))
-            self.start_insert_mode()
-            command_complete = True
-        elif event.value[-1] == "O":
-            cursor_row, _ = text_area.cursor_location
-            new_line = text_area.document.newline
-            text_area.insert(new_line, (cursor_row, 0))
-            text_area.action_cursor_up()
-            self.start_insert_mode()
-            command_complete = True
-
-        # Deleting text
-        elif event.value[-1] == "x":
-            if not text_area.cursor_at_end_of_line:
-                text_area.action_delete_right()
-                if text_area.cursor_at_end_of_line:
-                    text_area.action_cursor_left()
-            command_complete = True
-        elif event.value[-1] == "X":
-            if not text_area.cursor_at_start_of_line:
-                text_area.action_delete_left()
-            command_complete = True
-        elif event.value[-1] == "D":
-            text_area.action_delete_to_end_of_line()
-            text_area.action_cursor_left()
-            command_complete = True
-
-        # TODO: Copying and moving text
-
-        # Changing text
-        elif event.value[-1] == "C":
-            text_area.action_delete_to_end_of_line()
-            self.start_insert_mode()
-            command_complete = True
-
-        if command_complete:
-            event.input.value = ""
+        self.query_one(TextArea).load_text(text)
 
     @on(VimTextArea.Blurred)
     def on_vim_text_area_blurred(self) -> None:
@@ -319,3 +257,105 @@ class VimEditor(Widget):
     @on(VimTextArea.Focused)
     def on_vim_text_area_focused(self) -> None:
         self.start_insert_mode()
+
+    @on(CommandRegister.Changed)
+    async def on_command_register_changed(
+        self,
+        event: CommandRegister.Changed,
+    ) -> None:
+        if not event.value:
+            return
+        last_key = event.value[-1]
+        command = self._find_command(last_key)
+        if command is not None:
+            action_name, params = actions.parse(command.action)
+            method = getattr(self, f"_{action_name}", None)
+            if method:
+                await invoke(method, *params)
+                self.query_one(CommandRegister).clear()
+
+    def _find_command(self, key: str) -> Command | None:
+        for command in _COMMANDS:
+            if command.key == key:
+                return command
+        return None
+
+    # Left-right motions
+
+    def _left(self) -> None:
+        self.query_one(TextArea).action_cursor_left()
+
+    def _right(self) -> None:
+        self.query_one(TextArea).action_cursor_right()
+
+    def _line_start(self, first_nonwhite: bool) -> None:
+        text_area = self.query_one(TextArea)
+        target = text_area.get_cursor_line_start_location(first_nonwhite)
+        text_area.move_cursor(target)
+
+    def _line_end(self) -> None:
+        self.query_one(TextArea).action_cursor_line_end()
+
+    # Up-down motions
+
+    def _up(self) -> None:
+        self.query_one(TextArea).action_cursor_up()
+
+    def _down(self) -> None:
+        self.query_one(TextArea).action_cursor_down()
+
+    def _first_line(self) -> None:
+        text_area = self.query_one(TextArea)
+        _, cursor_column = text_area.cursor_location
+        text_area.move_cursor((0, cursor_column))
+
+    def _last_line(self) -> None:
+        text_area = self.query_one(TextArea)
+        last_line = text_area.document.line_count - 1
+        _, cursor_column = text_area.cursor_location
+        text_area.move_cursor((last_line, cursor_column))
+
+    # Inserting text
+
+    def _edit(self, key: str) -> None:
+        text_area = self.query_one(TextArea)
+        if key == "a":
+            text_area.action_cursor_right()
+        elif key == "A":
+            text_area.action_cursor_line_end()
+        elif key == "i":
+            pass
+        elif key == "I":
+            text_area.action_cursor_line_start()
+        self.start_insert_mode()
+
+    def _open_line(self, key: str) -> None:
+        text_area = self.query_one(TextArea)
+        cursor_row, _ = text_area.cursor_location
+        new_line = text_area.document.newline
+        if key == "o":
+            new_line = text_area.document.newline
+            text_area.insert(new_line, (cursor_row + 1, 0))
+        elif key == "O":
+            text_area.insert(new_line, (cursor_row, 0))
+            text_area.action_cursor_up()
+        self.start_insert_mode()
+
+    # Deleting text
+
+    def _delete(self, key: str) -> None:
+        text_area = self.query_one(TextArea)
+        if key == "x":
+            if not text_area.cursor_at_end_of_line:
+                text_area.action_delete_right()
+                if text_area.cursor_at_end_of_line:
+                    text_area.action_cursor_left()
+        elif key == "X":
+            if not text_area.cursor_at_start_of_line:
+                text_area.action_delete_left()
+        elif key == "D":
+            text_area.action_delete_to_end_of_line()
+            text_area.action_cursor_left()
+        elif key == "C":
+            text_area.action_delete_to_end_of_line()
+            self.start_insert_mode()
