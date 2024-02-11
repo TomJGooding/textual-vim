@@ -7,6 +7,7 @@ from textual._callback import invoke
 from textual.app import ComposeResult
 from textual.binding import Binding
 from textual.message import Message
+from textual.reactive import Reactive, reactive
 from textual.widget import Widget
 from textual.widgets import Input, Static, TextArea
 from textual.widgets.text_area import Location
@@ -125,6 +126,8 @@ class VimTextArea(TextArea, inherit_bindings=False):
         Binding("pagedown", "cursor_page_down", "cursor page down", show=False),
     ]
 
+    _cursor_visible: Reactive[bool] = reactive(True, repaint=False, init=False)
+
     class Blurred(Message):
         def __init__(self, vim_text_area: VimTextArea) -> None:
             super().__init__()
@@ -171,9 +174,13 @@ class VimTextArea(TextArea, inherit_bindings=False):
         )
 
     @override
-    def watch_has_focus(self, value: bool) -> None:
-        super().watch_has_focus(value)
-        self._cursor_visible = True
+    def _watch_has_focus(self, focus: bool) -> None:
+        self._cursor_visible = focus
+        if focus:
+            self._restart_blink()
+            self.app.cursor_position = self.cursor_screen_offset
+        else:
+            self._pause_blink(visible=True)
 
     @override
     def action_cursor_left(self, select: bool = False) -> None:
@@ -219,15 +226,11 @@ class VimTextArea(TextArea, inherit_bindings=False):
         # target_column = clamp(target_column, 0, len(self.document[target_row]))
         # return target_row, target_column
 
-    @override
     def _on_blur(self, _: events.Blur) -> None:
-        self._pause_blink(visible=True)
         self.action_cursor_left()
         self.post_message(self.Blurred(self))
 
-    @override
     def _on_focus(self, _: events.Focus) -> None:
-        self._restart_blink()
         self.post_message(self.Focused(self))
 
 
